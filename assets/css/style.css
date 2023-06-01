@@ -1,0 +1,11 @@
+img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+#current-weather-image {
+  width: 100px;
+  height: 200px;
+  object-fit: contain;
+}
