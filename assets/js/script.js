@@ -7,6 +7,7 @@ var requestURL =
 var baseRequestURL = "https://api.openweathermap.org/data/2.5/weather?";
 var baseGeoRequestURL = "http://api.openweathermap.org/geo/1.0/direct?q=";
 var URLEnding = "&units=imperial&appid=03367a7d999670d5ffb1a5e0906afaaa";
+var appID = "03367a7d999670d5ffb1a5e0906afaaa"; //This is my API key, just to have it saved
 
 var currentWeatherText = $("#current-weather");
 var currentWeatherImg = $("#current-weather-image");
@@ -17,25 +18,21 @@ var imageSourceBaseURL = "https://openweathermap.org/img/wn/";
 //TODO Add function that stores all of the previously entered cities, in an array and in permanent storage. The array should then build the history up until 10 items.
 //TODO figure out wtf you're doing for the forecast, it is very unclear
 //TODO create geolocation function for entered city, needed for the 5 day forecast
-function weatherFetcher(location) {
-  //   var coordinates = fetchCoordinates(location);
 
-  var geoRequestURL =
-    baseGeoRequestURL +
-    location +
-    "&limit=5&appid=03367a7d999670d5ffb1a5e0906afaaa";
-  console.log("The URL is: " + geoRequestURL);
-  fetch(geoRequestURL)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
-      geocodeObject = data;
-      var coordinates = [geocodeObject[0].lat, geocodeObject[0].lon];
-    });
+// This function was made asynchronous in order to allow the "coordinates" variable to await the results of the fetchCoordinates function
+async function weatherFetcher(location) {
+  var coordinates = await fetchCoordinates(location); //coordinates are [lat, lon]
+  console.log("coordinates below");
+  console.log(coordinates);
 
-  requestURL = baseRequestURL + "q=" + location + URLEnding;
-
+  requestURL =
+    baseRequestURL +
+    "lat=" +
+    coordinates[0] +
+    "&lon=" +
+    coordinates[1] +
+    URLEnding;
+  console.log("requestURL: " + requestURL);
   fetch(requestURL)
     .then(function (response) {
       return response.json();
@@ -43,8 +40,6 @@ function weatherFetcher(location) {
     .then(function (data) {
       var weatherObject = data;
       var conditions = weatherObject.weather[0];
-      //   console.log(weatherObject);
-      //   console.log(data.weather[0].main);
       $("#current-weather-location-text").text(weatherObject.name);
       currentWeatherText.text(conditions.main);
       currentWeatherImg.attr(
@@ -80,19 +75,17 @@ function testFetcher() {
     });
 }
 
-// function fetchCoordinates(location) {
-//   var geoRequestURL =
-//     baseGeoRequestURL +
-//     location +
-//     "&limit=5&appid=03367a7d999670d5ffb1a5e0906afaaa";
-//   console.log("The URL is: " + geoRequestURL);
-//   fetch(geoRequestURL)
-//     .then(function (response) {
-//       return response.json();
-//     })
-//     .then(function (data) {
-//       geocodeObject = data;
-//       var coordinates = [geocodeObject[0].lat, geocodeObject[0].lon];
-//       //   console.log(coordinates);
-//     });
-// }
+// I found that because the fetch.then.then structure worked with asynchronous data, I was unable to get out
+async function fetchCoordinates(location) {
+  var geoRequestURL =
+    baseGeoRequestURL +
+    location +
+    "&limit=5&appid=03367a7d999670d5ffb1a5e0906afaaa";
+  console.log("The URL is: " + geoRequestURL);
+  var response = await fetch(geoRequestURL);
+  var data = await response.json();
+  geocodeObject = data;
+  var coordinates = [geocodeObject[0].lat, geocodeObject[0].lon];
+  console.log(coordinates);
+  return coordinates;
+}
