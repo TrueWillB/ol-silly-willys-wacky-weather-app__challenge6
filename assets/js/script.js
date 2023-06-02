@@ -1,21 +1,10 @@
-var test = dayjs.unix(1685674800);
-
-console.log(dayjs.unix(1685674800).format("MMM[ ]DD[, ]YYYY"));
-
-var testRequestURL =
-  "http://api.openweathermap.org/geo/1.0/direct?q=Denver&limit=5&appid=03367a7d999670d5ffb1a5e0906afaaa";
-//   "https://api.openweathermap.org/data/2.5/forecast/daily?lat=51.5073219&lon=-0.1276474&cnt=3&appid=03367a7d999670d5ffb1a5e0906afaaa";
-
 var baseRequestURL = "https://api.openweathermap.org/data/2.5/weather?";
 var baseGeoRequestURL = "http://api.openweathermap.org/geo/1.0/direct?q=";
 var baseForecastURL = "https://api.openweathermap.org/data/2.5/forecast?";
 var URLEnding = "&units=imperial&appid=03367a7d999670d5ffb1a5e0906afaaa";
-var appID = "03367a7d999670d5ffb1a5e0906afaaa"; //This is my API key, just to have it saved
-var currentWeatherText = $("#current-weather");
-var currentWeatherImg = $("#current-weather-image");
 var imageSourceBaseURL = "https://openweathermap.org/img/wn/";
 var cityHistoryArray;
-var activeButton;
+//initializes the city history. If there is no city history, it defaults to Denver, because I said so
 if (localStorage.getItem("storedCityHistoryArray") == null) {
   cityHistoryArray = ["Denver"];
 } else {
@@ -23,7 +12,7 @@ if (localStorage.getItem("storedCityHistoryArray") == null) {
 }
 weatherFetcher(cityHistoryArray[0]); //This function starts the page, it will default to Denver if there is no saved history
 
-// This function was made asynchronous in order to allow the "coordinates" variable to await the results of the fetchCoordinates function
+// This function was made asynchronous in order to allow the "coordinates" variable to await the results of the fetchCoordinates function, it is essentially responisble for fetching and handling all of the weather data
 async function weatherFetcher(location) {
   var geocodeObject = await fetchCoordinates(location); //Takes the input from the listener or from the
   try {
@@ -32,7 +21,6 @@ async function weatherFetcher(location) {
     $("#locationHelp").addClass("form-text text-light");
     $("#locationHelp").text("Please enter desired location below");
   } catch {
-    //coordinates are [lat, lon]
     console.log("error error");
     $("#locationHelp").text("Location not found, please try again");
     $("#locationHelp").removeClass("text-light");
@@ -49,7 +37,6 @@ async function weatherFetcher(location) {
     "&lon=" +
     coordinates[1] +
     URLEnding;
-  // console.log("requestURL: " + requestURL);
 
   //This section gets the current weather and displays it
   fetch(requestURL)
@@ -60,6 +47,8 @@ async function weatherFetcher(location) {
       var weatherObject = data;
       var conditions = weatherObject.weather[0];
       $("#current-weather-location-text").text(weatherObject.name);
+      var currentWeatherText = $("#current-weather");
+      var currentWeatherImg = $("#current-weather-image");
       currentWeatherText.text(conditions.main);
       currentWeatherImg.attr(
         "src",
@@ -95,10 +84,7 @@ async function weatherFetcher(location) {
         forecastTemp = forecastObject.list[(i + 1) * 8 - 1].main.temp;
         forecastWind = forecastObject.list[(i + 1) * 8 - 1].wind.speed;
         forecastHumidity = forecastObject.list[(i + 1) * 8 - 1].main.humidity;
-        // unixTime = forecastObject.list[(i + 1) * 8 - 1].dt
-        // unixTime = forecastObject.list[(i + 1) * 8 - 1].dt
         formattedDate = dayjs.unix(unixTime).format("MMM[ ]DD");
-
         currentDayCard.children(".forecast-date").text(formattedDate);
         currentDayCard.children(".forecast-image").attr("src", forecastIconUrl);
         currentDayCard
@@ -113,26 +99,28 @@ async function weatherFetcher(location) {
           .children("p")
           .children("span.forecast-humidity")
           .text(forecastHumidity);
-
-        console.log(forecastTemp);
       }
     });
 }
 
+//A listener for pressing "enter" to execute a search from the input bar
 $("#location-input").on("keydown", function (event) {
   if (event.key == "Enter") {
     searchForLocation(event);
   }
 });
 
+//A listener for the search button
 $("#search-button").on("click", function (event) {
   searchForLocation(event);
 });
 
+//A listener for clicking on the city history buttons
 $("#city-history-list").on("click", ".city-list-button", function (event) {
   weatherFetcher($(event.target).text());
 });
 
+//Handles the event coming from the input bar and sends the info to the weather fetcher
 function searchForLocation(event) {
   event.preventDefault();
   var inputCity = $("#location-input").val();
@@ -152,7 +140,7 @@ async function fetchCoordinates(location) {
   return geocodeObject;
 }
 
-//This function adds to the location history of searched cities
+//This function adds to the location history of searched cities and saves it to local memory
 function buildHistoryButtons(locName) {
   var sameName = false;
   if (cityHistoryArray.includes(locName)) {
@@ -167,14 +155,13 @@ function buildHistoryButtons(locName) {
       cityHistoryArray.unshift(locName);
     }
   }
-  console.log(cityHistoryArray);
   $("#city-history-list").empty();
   for (i = 0; i < cityHistoryArray.length; i++) {
     var cityListButton = $("<li>");
     cityListButton.addClass("city-list-button list-group-item");
     cityListButton.text(cityHistoryArray[i]);
     if (cityListButton.text() == locName) {
-      cityListButton.addClass("active");
+      cityListButton.addClass("active"); //This highlights the history button that the user just clicked
     }
     $("#city-history-list").append(cityListButton);
   }
