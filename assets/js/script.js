@@ -1,5 +1,5 @@
 var baseRequestURL = "https://api.openweathermap.org/data/2.5/weather?";
-var baseGeoRequestURL = "http://api.openweathermap.org/geo/1.0/direct?q=";
+var baseGeoRequestURL = "https://api.openweathermap.org/geo/1.0/direct?q=";
 var baseForecastURL = "https://api.openweathermap.org/data/2.5/forecast?";
 var URLEnding = "&units=imperial&appid=03367a7d999670d5ffb1a5e0906afaaa";
 var imageSourceBaseURL = "https://openweathermap.org/img/wn/";
