@@ -2,7 +2,7 @@
 
 A weather dashboard that shows the weather forecast
 
-## Link to deployed page: https://willis291.github.io/ol-silly-willys-wacky-weather-app__challenge6/
+## Link to deployed page: https://TrueWillB.github.io/ol-silly-willys-wacky-weather-app__challenge6/
 
 ## Purpose
 
